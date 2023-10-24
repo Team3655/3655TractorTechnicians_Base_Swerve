@@ -4,10 +4,10 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class OdometryCommand extends CommandBase {
+public class OdometryCommand extends Command {
 
 	private static DriveSubsystem driveSubsystem;
 

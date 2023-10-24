@@ -6,13 +6,13 @@ package frc.robot.commands.Limelight;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.TractorToolbox.TractorParts.DoubleSmoother;
 import frc.lib.util.LimelightHelpers;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class LLAlignCommand extends CommandBase {
+public class LLAlignCommand extends Command {
 
 	private static DriveSubsystem driveSubsystem;
 

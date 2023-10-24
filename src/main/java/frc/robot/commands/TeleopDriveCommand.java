@@ -9,12 +9,12 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.TractorToolbox.JoystickUtils;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class TeleopDriveCommand extends CommandBase {
+public class TeleopDriveCommand extends Command {
 
 	private DriveSubsystem driveSubsystem;
 

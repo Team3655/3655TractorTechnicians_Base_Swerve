@@ -5,12 +5,12 @@
 package frc.robot.commands.Limelight;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.LimelightHelpers;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class LLTargetCommand extends CommandBase {
+public class LLTargetCommand extends Command {
 
 	private static DriveSubsystem driveSubsystem;
 

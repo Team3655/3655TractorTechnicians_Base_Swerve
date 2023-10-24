@@ -6,10 +6,10 @@ package frc.robot.commands.Autonomous;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class TimedDriveCommand extends CommandBase {
+public class TimedDriveCommand extends Command {
 
 	private static DriveSubsystem driveSubsystem;
 	Timer timer;
