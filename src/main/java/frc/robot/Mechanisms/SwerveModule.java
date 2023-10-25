@@ -157,6 +157,12 @@ public class SwerveModule {
 				driveEncoder.getPosition(),
 				new Rotation2d(throughBore.getPosition() - angleZeroOffset));
 	}
+
+	public SwerveModuleState getModuleState() {
+		return new SwerveModuleState(
+				driveEncoder.getVelocity(),
+				Rotation2d.fromRadians(getAbsoluteHeading()));
+	}
 	// endregion: getters
 
 	// region: Setters

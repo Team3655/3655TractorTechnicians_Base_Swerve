@@ -154,13 +154,16 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public SwerveModuleState[] getSwerveModuleStates() {
 		SwerveModuleState[] moduleStates = new SwerveModuleState[]{
-		
+			frontLeft.getModuleState(),
+			frontRight.getModuleState(),
+			backLeft.getModuleState(),
+			backRight.getModuleState(),
 		};
-		return null;
+		return moduleStates;
 	}
 
 	public ChassisSpeeds getChassisSpeeds() {
-		return DriveConstants.kDriveKinematics.toChassisSpeeds();
+		return DriveConstants.kDriveKinematics.toChassisSpeeds(getSwerveModuleStates());
 	}
 
 	// endregion

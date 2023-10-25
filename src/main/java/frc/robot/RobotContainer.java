@@ -35,7 +35,7 @@ public class RobotContainer {
 	// The robot's subsystems and commands are defined here...
 	private static final DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
 
-	private static final PathBuilder autoBuilder = new PathBuilder();
+	// private static final PathBuilder autoBuilder = new PathBuilder();
 
 	private final CommandJoystick driveJoystick = new CommandJoystick(
 			OperatorConstants.kDriveJoystickPort);
@@ -57,10 +57,6 @@ public class RobotContainer {
 
 		// region Def Auto
 		Shuffleboard.getTab("Driver").add(autoChooser);
-
-		autoBuilder.populatePathMap();
-
-		autoChooser.addOption("Square", autoBuilder.getPathCommand("Square"));
 		// endregion
 	}
 
