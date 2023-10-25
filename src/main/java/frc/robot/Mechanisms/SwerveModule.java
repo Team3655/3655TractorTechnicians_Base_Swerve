@@ -155,7 +155,7 @@ public class SwerveModule {
 		// relative to the chassis.
 		return new SwerveModulePosition(
 				driveEncoder.getPosition(),
-				new Rotation2d(throughBore.getPosition() - angleZeroOffset));
+				Rotation2d.fromRadians(getAbsoluteHeading()));
 	}
 
 	public SwerveModuleState getModuleState() {

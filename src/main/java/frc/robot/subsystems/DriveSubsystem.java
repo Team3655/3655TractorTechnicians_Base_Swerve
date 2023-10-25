@@ -8,6 +8,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -111,11 +112,19 @@ public class DriveSubsystem extends SubsystemBase {
 
 		field = new Field2d();
 
+		// Define the standard deviations for the pose estimator, which determine how
+		// fast the pose estimate converges to the vision measurement. This should
+		// depend on the vision measurement noise and how many or how frequently vision
+		// measurements are applied to the pose estimator.
+		double stateStdDev = 0.1;
+		double visionStdDev = 1;
 		posEstimator = new SwerveDrivePoseEstimator(
 				DriveConstants.kDriveKinematics,
 				gyro.getRotation2d(),
 				swervePositions,
-				new Pose2d());
+				new Pose2d(),
+				VecBuilder.fill(stateStdDev, stateStdDev, stateStdDev),
+				VecBuilder.fill(visionStdDev, visionStdDev, visionStdDev));
 	}
 
 	@Override
@@ -153,11 +162,11 @@ public class DriveSubsystem extends SubsystemBase {
 	}
 
 	public SwerveModuleState[] getSwerveModuleStates() {
-		SwerveModuleState[] moduleStates = new SwerveModuleState[]{
-			frontLeft.getModuleState(),
-			frontRight.getModuleState(),
-			backLeft.getModuleState(),
-			backRight.getModuleState(),
+		SwerveModuleState[] moduleStates = new SwerveModuleState[] {
+				frontLeft.getModuleState(),
+				frontRight.getModuleState(),
+				backLeft.getModuleState(),
+				backRight.getModuleState(),
 		};
 		return moduleStates;
 	}
@@ -256,10 +265,8 @@ public class DriveSubsystem extends SubsystemBase {
 
 		posEstimator.update(gyro.getRotation2d(), swervePositions);
 
-
-		posEstimator.update(gyroAngle, wheelPositions);
-		posEstimator.update(gyroAngle, modulePositions);
-		
+		// posEstimator.update(gyroAngle, wheelPositions);
+		// posEstimator.update(gyroAngle, modulePositions);
 
 		field.setRobotPose(posEstimator.getEstimatedPosition());
 	}
