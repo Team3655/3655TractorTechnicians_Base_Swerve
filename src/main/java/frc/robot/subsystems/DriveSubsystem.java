@@ -256,6 +256,11 @@ public class DriveSubsystem extends SubsystemBase {
 
 		posEstimator.update(gyro.getRotation2d(), swervePositions);
 
+
+		posEstimator.update(gyroAngle, wheelPositions);
+		posEstimator.update(gyroAngle, modulePositions);
+		
+
 		field.setRobotPose(posEstimator.getEstimatedPosition());
 	}
 
