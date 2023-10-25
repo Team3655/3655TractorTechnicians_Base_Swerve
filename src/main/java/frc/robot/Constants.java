@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.HashMap;
 
+import com.pathplanner.lib.util.PIDConstants;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -28,11 +30,10 @@ public final class Constants {
 
 	public static class ModuleConstants {
 
-		public static final int kMaxRezeroAttempts = 10;
-
 		// gains set for R1 SDS mk4i using dual neo motors
 		public static final PIDGains kModuleDriveGains = new PIDGains(.075, 0, 0);
 		public static final PIDGains kModuleTurningGains = new PIDGains(1.5, 0.002, 0.0016);
+		public static final PIDConstants kTestPIDConstants = new PIDConstants(1.5, 0.002, 0.0016);
 
 		public static final class GenericModuleConstants {
 			// Current limits for the wheels
