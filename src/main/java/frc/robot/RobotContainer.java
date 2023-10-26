@@ -5,8 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -35,7 +33,9 @@ public class RobotContainer {
 	// The robot's subsystems and commands are defined here...
 	private static final DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
 
-	// private static final PathBuilder autoBuilder = new PathBuilder();
+	private final PPHandler autoHandler = PPHandler.getInstance();
+
+	
 
 	private final CommandJoystick driveJoystick = new CommandJoystick(
 			OperatorConstants.kDriveJoystickPort);
@@ -46,8 +46,6 @@ public class RobotContainer {
 	private final CommandXboxController programmerController = new CommandXboxController(
 			OperatorConstants.kProgrammerControllerPort);
 
-	private SendableChooser<Command> autoChooser = new SendableChooser<>();
-
 	/**
 	 * The container for the robot. Contains subsystems, OI devices, and commands.
 	 */
@@ -56,7 +54,8 @@ public class RobotContainer {
 		configureBindings();
 
 		// region Def Auto
-		Shuffleboard.getTab("Driver").add(autoChooser);
+
+		
 		// endregion
 	}
 
@@ -99,9 +98,9 @@ public class RobotContainer {
 		// Swerve Drive command is set as default for drive subsystem
 		driveSubsystem.setDefaultCommand(
 				new TeleopDriveCommand(
-						() -> -driveJoystick.getY() -programmerController.getLeftY(),
-						() -> -driveJoystick.getX() -programmerController.getLeftX(),
-						() -> -turnJoystick.getX() -programmerController.getRightX(),
+						() -> -driveJoystick.getY() - programmerController.getLeftY(),
+						() -> -driveJoystick.getX() - programmerController.getLeftX(),
+						() -> -turnJoystick.getX() - programmerController.getRightX(),
 						() -> driveJoystick.getHID().getRawButton(1)
 								|| programmerController.rightBumper().getAsBoolean(),
 						() -> driveJoystick.getHID().getRawButton(2)
@@ -119,6 +118,6 @@ public class RobotContainer {
 		driveSubsystem.setHeading(180);
 		Timer.delay(0.05);
 		// the command to be run in autonomous
-		return autoChooser.getSelected();
+		return autoHandler.getAutonomousCommand();
 	}
 }
