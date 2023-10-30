@@ -57,17 +57,16 @@ public class PPHandler {
 		return autoChooser.getSelected();
 	}
 
-
 	public Command getPathfindingCommand(Pose2d targetPose, double endVelocity, double rotationDelay) {
 		Command pathfindingCommand = AutoBuilder.pathfindToPose(
-			targetPose,
-			pathConstraints,
-			endVelocity, // Goal end velocity in meters/sec
-			rotationDelay // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate.
+				targetPose,
+				pathConstraints,
+				endVelocity, // Goal end velocity in meters/sec
+				rotationDelay // Rotation delay distance in meters. This is how far the robot should travel
+								// before attempting to rotate.
 		);
 		return pathfindingCommand;
 	}
-
 
 	public void addAuto(String name) {
 		autoChooser.addOption(name, new PathPlannerAuto(name));
