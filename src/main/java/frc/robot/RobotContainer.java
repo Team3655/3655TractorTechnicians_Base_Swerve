@@ -5,6 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -15,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.commands.TurnCommand;
-import frc.robot.commands.Autonomous.BalanceCommand;
 import frc.robot.commands.Limelight.LLAlignCommand;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -33,9 +34,7 @@ public class RobotContainer {
 	// The robot's subsystems and commands are defined here...
 	private static final DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
 
-	private final PPHandler autoHandler = PPHandler.getInstance();
-
-	
+	// private static final PathBuilder autoBuilder = new PathBuilder();
 
 	private final CommandJoystick driveJoystick = new CommandJoystick(
 			OperatorConstants.kDriveJoystickPort);
@@ -46,6 +45,8 @@ public class RobotContainer {
 	private final CommandXboxController programmerController = new CommandXboxController(
 			OperatorConstants.kProgrammerControllerPort);
 
+	private SendableChooser<String> autoChooser = new SendableChooser<>();
+
 	/**
 	 * The container for the robot. Contains subsystems, OI devices, and commands.
 	 */
@@ -54,8 +55,8 @@ public class RobotContainer {
 		configureBindings();
 
 		// region Def Auto
-
-		
+		Shuffleboard.getTab("Driver").add(autoChooser);
+		// autoChooser.addOption();
 		// endregion
 	}
 
@@ -75,13 +76,10 @@ public class RobotContainer {
 		// region Targeting Commmands
 		driveJoystick.button(3).whileTrue(new LLAlignCommand(false));
 		driveJoystick.button(4).whileTrue(new LLAlignCommand(true));
-		driveJoystick.button(5).whileTrue(new BalanceCommand());
 		programmerController.a().whileTrue(new LLAlignCommand(false));
 		programmerController.x().whileTrue(new TurnCommand(180));
 		// endregion
 
-		// test balance
-		operatorController.button(12).whileTrue(new BalanceCommand());
 
 		// region Drive Commands
 		driveJoystick.button(11).onTrue(new InstantCommand(() -> driveSubsystem.zeroHeading()));
@@ -98,9 +96,9 @@ public class RobotContainer {
 		// Swerve Drive command is set as default for drive subsystem
 		driveSubsystem.setDefaultCommand(
 				new TeleopDriveCommand(
-						() -> -driveJoystick.getY() - programmerController.getLeftY(),
-						() -> -driveJoystick.getX() - programmerController.getLeftX(),
-						() -> -turnJoystick.getX() - programmerController.getRightX(),
+						() -> -driveJoystick.getY() -programmerController.getLeftY(),
+						() -> -driveJoystick.getX() -programmerController.getLeftX(),
+						() -> -turnJoystick.getX() -programmerController.getRightX(),
 						() -> driveJoystick.getHID().getRawButton(1)
 								|| programmerController.rightBumper().getAsBoolean(),
 						() -> driveJoystick.getHID().getRawButton(2)
@@ -118,6 +116,6 @@ public class RobotContainer {
 		driveSubsystem.setHeading(180);
 		Timer.delay(0.05);
 		// the command to be run in autonomous
-		return autoHandler.getAutonomousCommand();
+		return autoChooser.getSelected();
 	}
 }
