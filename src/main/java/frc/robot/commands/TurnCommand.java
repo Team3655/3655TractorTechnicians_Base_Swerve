@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DriveSubsystem;
@@ -52,9 +53,9 @@ public class TurnCommand extends Command {
 	public void execute() {
 		if (!turnPIDController.atSetpoint()) {
 			double turnOutput = turnPIDController.calculate(driveSubsystem.getHeading());
-			driveSubsystem.codeDrive(0, 0, turnOutput);
+			driveSubsystem.fieldCentricDrive(new ChassisSpeeds(0, 0, turnOutput));
 		} else {
-			driveSubsystem.codeDrive(0, 0, 0);
+			driveSubsystem.fieldCentricDrive(new ChassisSpeeds(0, 0, 0));
 		}
 	}
 
@@ -62,7 +63,7 @@ public class TurnCommand extends Command {
 	@Override
 	public void end(boolean interrupted) {
 		// sets motors speeds back to zero when event is complete
-		driveSubsystem.codeDrive(0, 0, 0);
+		driveSubsystem.fieldCentricDrive(new ChassisSpeeds(0, 0, 0));
 	}
 
 	// Returns true when the command should end.

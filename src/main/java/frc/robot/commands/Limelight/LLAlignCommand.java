@@ -5,6 +5,7 @@
 package frc.robot.commands.Limelight;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.TractorToolbox.TractorParts.DoubleSmoother;
@@ -79,10 +80,11 @@ public class LLAlignCommand extends Command {
 			double strafeOutput = strafeOutputSmoother.smoothInput(strafePIDOutput);
 			double driveOutput = driveOutputSmoother.smoothInput(drivePIDOutput);
 
-			driveSubsystem.codeDrive(driveOutput, -strafeOutput, 0);
+			driveSubsystem.fieldCentricDrive(new ChassisSpeeds(driveOutput, strafeOutput, 0));
 
 		} else {
-			driveSubsystem.codeDrive(0, 0, 0);
+			driveSubsystem.fieldCentricDrive(new ChassisSpeeds(0, 0, 0));
+
 		}
 	}
 
