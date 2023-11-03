@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.TractorToolbox.TractorParts.PIDGains;
 import frc.lib.TractorToolbox.TractorParts.SwerveConstants;
 import frc.lib.TractorToolbox.TractorParts.SwerveModuleConstants;
-import frc.robot.commands.Limelight.LLAlignCommand;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -164,10 +163,7 @@ public final class Constants {
 			public static final double kPPMaxAcceleration = 2.50;
 
 			public static final HashMap<String, Command> kPPEventMap = new HashMap<>() {
-				{
-					put("TargetTape", new LLAlignCommand(false));
-					put("TargetTag", new LLAlignCommand(true));
-				}
+				{}
 			};
 		}
 

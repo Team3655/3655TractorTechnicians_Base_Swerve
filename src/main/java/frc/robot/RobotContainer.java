@@ -17,8 +17,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.TeleopDriveCommand;
-import frc.robot.commands.TurnCommand;
-import frc.robot.commands.Limelight.LLAlignCommand;
 import frc.robot.subsystems.DriveSubsystem;
 
 /**
@@ -75,13 +73,6 @@ public class RobotContainer {
 	 */
 	private void configureBindings() {
 
-		// region Targeting Commmands
-		driveJoystick.button(3).whileTrue(new LLAlignCommand(false));
-		driveJoystick.button(4).whileTrue(new LLAlignCommand(true));
-		programmerController.a().whileTrue(new LLAlignCommand(false));
-		programmerController.x().whileTrue(new TurnCommand(180));
-		// endregion
-
 		// region Drive Commands
 		driveJoystick.button(11).onTrue(new InstantCommand(() -> driveSubsystem.zeroHeading()));
 
@@ -106,9 +97,6 @@ public class RobotContainer {
 		driveSubsystem.setHeading(180);
 		Timer.delay(0.05);
 		// the command to be run in autonomous
-
-		
-
 		return autoChooser.getSelected();
 	}
 }
