@@ -50,9 +50,7 @@ public class RobotContainer {
 	public RobotContainer() {
 
 		// region Def Auto
-		PPHandler.configAutoBuilder();
-
-		autoChooser = AutoBuilder.buildAutoChooser(null);
+		autoChooser = AutoBuilder.buildAutoChooser();
 		Shuffleboard.getTab("Auto").add(autoChooser);
 		// endregion
 
@@ -73,11 +71,6 @@ public class RobotContainer {
 	 */
 	private void configureBindings() {
 
-		// region Drive Commands
-		driveJoystick.button(11).onTrue(new InstantCommand(() -> driveSubsystem.zeroHeading()));
-
-		programmerController.button(8).onTrue(new InstantCommand(() -> driveSubsystem.zeroHeading()));
-
 		// Swerve Drive command is set as default for drive subsystem
 		driveSubsystem.setDefaultCommand(
 				new TeleopDriveCommand(
@@ -93,9 +86,6 @@ public class RobotContainer {
 	 * @return the command to run in autonomous
 	 */
 	public Command getAutonomousCommand() {
-
-		driveSubsystem.setHeading(180);
-		Timer.delay(0.05);
 		// the command to be run in autonomous
 		return autoChooser.getSelected();
 	}

@@ -26,12 +26,10 @@ public class DriveSubsystem extends SwerveDrivetrain implements Subsystem {
 
 	private SwerveRequest.ApplyChassisSpeeds chassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
 
-	public DriveSubsystem getInstance() {
+	public static DriveSubsystem getInstance() {
 		if (instance == null)
-			return instance = new DriveSubsystem(null, UpdateFrequency, null)
-		else
-			return instance;
-
+			return instance = new DriveSubsystem();
+		return instance;
 	}
 
 	/**
@@ -41,11 +39,9 @@ public class DriveSubsystem extends SwerveDrivetrain implements Subsystem {
 	 * @param OdometryUpdateFrequency
 	 * @param modules
 	 */
-	private DriveSubsystem(
-			SwerveDrivetrainConstants drivetrainConstants,
-			double OdometryUpdateFrequency,
-			SwerveModuleConstants... modules) {
-		super(drivetrainConstants, OdometryUpdateFrequency, modules);
+	private DriveSubsystem() {
+		super();
+		//super(drivetrainConstants, OdometryUpdateFrequency, modules);
 		configAutoBuilder();
 	}
 
