@@ -6,6 +6,7 @@ package frc.robot.commands.Limelight;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.TractorToolbox.TractorParts.DoubleSmoother;
@@ -62,9 +63,9 @@ public class LLPuppydogCommand extends Command {
 			double turnOutput = turnOutputSmoother.smoothInput(turnPIDOutput);
 			double driveOutput = driveOutputSmoother.smoothInput(drivePIDOutput);
 
-			driveSubsystem.robotCentricDrive(driveOutput, 0, -turnOutput);
+			driveSubsystem.robotCentricDrive(new ChassisSpeeds(driveOutput, 0, -turnOutput));
 		} else {
-			driveSubsystem.robotCentricDrive(0, 0, 0);
+			driveSubsystem.robotCentricDrive(new ChassisSpeeds(0,0, 0));
 		}
 	}
 

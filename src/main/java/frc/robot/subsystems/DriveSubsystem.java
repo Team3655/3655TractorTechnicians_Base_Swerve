@@ -11,7 +11,6 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -20,7 +19,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.LimelightHelpers;
 import frc.robot.Constants.DriveConstants;
@@ -36,8 +34,6 @@ import frc.robot.Mechanisms.SwerveModule;
 public class DriveSubsystem extends SubsystemBase {
 
 	private static DriveSubsystem driveSubsystemInstance = null;
-
-	private boolean useFieldCentric = true;
 
 	private final double pitchOffset;
 
@@ -57,10 +53,8 @@ public class DriveSubsystem extends SubsystemBase {
 	private Field2d field;
 
 	public static DriveSubsystem getInstance() {
-
 		if (driveSubsystemInstance == null)
 			driveSubsystemInstance = new DriveSubsystem();
-
 		return driveSubsystemInstance;
 	}
 
@@ -134,6 +128,7 @@ public class DriveSubsystem extends SubsystemBase {
 		updateOdometry();
 
 		updateTelemetry();
+
 	}
 
 	// region getters
@@ -154,7 +149,7 @@ public class DriveSubsystem extends SubsystemBase {
 	}
 
 	public double getTurnRate() {
-		return gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+		return gyro.getRate();
 	}
 
 	public Pose2d getPoseEstimatorPose2d() {
@@ -177,10 +172,10 @@ public class DriveSubsystem extends SubsystemBase {
 
 	// endregion
 
-	// region setter
+	// region setters
 
 	public void lockWheels() {
-		double rot = DriveConstants.kMaxRPM;
+		double rot = DriveConstants.kMaxRadiansPerSecond;
 
 		SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
 				new ChassisSpeeds(0, 0, rot));
@@ -188,64 +183,38 @@ public class DriveSubsystem extends SubsystemBase {
 		SwerveDriveKinematics.desaturateWheelSpeeds(
 				swerveModuleStates, 0);
 
-		setModuleStates(swerveModuleStates, false);
+		setModuleStates(swerveModuleStates);
 	}
 
-	public void robotCentricDrive(double xSpeed, double ySpeed, double rotation) {
-		boolean wasFieldCentric = useFieldCentric;
-		setFieldCentric(false);
-		codeDrive(xSpeed, ySpeed, rotation);
-		setFieldCentric(wasFieldCentric);
+	public void robotCentricDrive(ChassisSpeeds chassisSpeeds) {
+
+		chassisSpeeds = chassisSpeeds.times(DriveConstants.kMaxSpeedMetersPerSecond);
+		chassisSpeeds.omegaRadiansPerSecond *= DriveConstants.kMaxRadiansPerSecond;
+
+		fieldCentricDrive(chassisSpeeds);
 	}
 
-	public void codeDrive(double xSpeed, double ySpeed, double rotation) {
-		Translation2d dir = new Translation2d(xSpeed, ySpeed);
-		drive(dir, rotation, false, false);
-	}
+	public void fieldCentricDrive(ChassisSpeeds chassisSpeeds) {
 
-	public void drive(Translation2d translation, double rotation, boolean isTurbo, boolean isSneak) {
+		chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d());
 
-		double maxSpeed;
-
-		if (isSneak) {
-			maxSpeed = DriveConstants.kMaxSneakMetersPerSecond;
-		} else {
-			maxSpeed = DriveConstants.kMaxSpeedMetersPerSecond;
-		}
-
-		translation = translation.times(maxSpeed);
-
-		double xSpeed = translation.getX();
-		double ySpeed = translation.getY();
-
-		rotation *= DriveConstants.kMaxRPM;
-
-		ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, rotation);
-
-		if (useFieldCentric)
-			chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d());
-
-		setChassisSpeeds(chassisSpeeds);
+		robotCentricDrive(chassisSpeeds);
 	}
 
 	public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
 		SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
 		// set the swerve modules to their states
-		setModuleStates(swerveModuleStates, false);
+		setModuleStates(swerveModuleStates);
 	}
 
 	public void setModuleStates(SwerveModuleState[] desiredStates) {
-		setModuleStates(desiredStates, false);
-	}
-
-	public void setModuleStates(SwerveModuleState[] desiredStates, boolean isTurbo) {
 		SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates,
 				GenericModuleConstants.kMaxModuleSpeedMetersPerSecond);
 
-		frontLeft.setDesiredState(desiredStates[0], isTurbo);
-		frontRight.setDesiredState(desiredStates[1], isTurbo);
-		backLeft.setDesiredState(desiredStates[2], isTurbo);
-		backRight.setDesiredState(desiredStates[3], isTurbo);
+		frontLeft.setDesiredState(desiredStates[0]);
+		frontRight.setDesiredState(desiredStates[1]);
+		backLeft.setDesiredState(desiredStates[2]);
+		backRight.setDesiredState(desiredStates[3]);
 	}
 
 	public void resetPoseEstimator(Pose2d pose) {
@@ -264,9 +233,6 @@ public class DriveSubsystem extends SubsystemBase {
 		};
 
 		posEstimator.update(gyro.getRotation2d(), swervePositions);
-
-		// posEstimator.update(gyroAngle, wheelPositions);
-		// posEstimator.update(gyroAngle, modulePositions);
 
 		field.setRobotPose(posEstimator.getEstimatedPosition());
 	}
@@ -290,14 +256,6 @@ public class DriveSubsystem extends SubsystemBase {
 
 	public void setHeading(double heading) {
 		gyro.setYaw(heading);
-	}
-
-	public void setFieldCentric(boolean fieldCentric) {
-		useFieldCentric = fieldCentric;
-	}
-
-	public InstantCommand toggleFieldCentric() {
-		return new InstantCommand(() -> setFieldCentric(!useFieldCentric));
 	}
 
 	public void updateTelemetry() {

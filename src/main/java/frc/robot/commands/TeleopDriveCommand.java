@@ -4,10 +4,10 @@
 
 package frc.robot.commands;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.TractorToolbox.JoystickUtils;
@@ -21,19 +21,18 @@ public class TeleopDriveCommand extends Command {
 	private DoubleSupplier forwardSupplier;
 	private DoubleSupplier strafeSupplier;
 	private DoubleSupplier rotationSupplier;
-	private BooleanSupplier isTurboSupplier;
-	private BooleanSupplier isSneakSupplier;
 
-	//private SlewRateLimiter speedLimiter;
-	//private SlewRateLimiter rotationLimiter;
+	private double forward;
+	private double strafe;
+	private double rotation;
+
+	private ChassisSpeeds chassisSpeeds;
 
 	/** Creates a new TeleopDriveCommand. */
 	public TeleopDriveCommand(
-		DoubleSupplier forwardSupplier,
-		DoubleSupplier strafeSupplier,
-		DoubleSupplier rotationSupplier,
-		BooleanSupplier isTurboSupplier,
-		BooleanSupplier isSneakSupplier) {
+			DoubleSupplier forwardSupplier,
+			DoubleSupplier strafeSupplier,
+			DoubleSupplier rotationSupplier) {
 
 		// Use addRequirements() here to declare subsystem dependencies.
 		driveSubsystem = DriveSubsystem.getInstance();
@@ -42,8 +41,6 @@ public class TeleopDriveCommand extends Command {
 		this.forwardSupplier = forwardSupplier;
 		this.strafeSupplier = strafeSupplier;
 		this.rotationSupplier = rotationSupplier;
-		this.isTurboSupplier = isTurboSupplier;
-		this.isSneakSupplier = isSneakSupplier;
 
 	}
 
@@ -51,11 +48,9 @@ public class TeleopDriveCommand extends Command {
 	@Override
 	public void execute() {
 
-		double forward = forwardSupplier.getAsDouble();
-		double strafe = strafeSupplier.getAsDouble();
-		double rotation = rotationSupplier.getAsDouble();
-		boolean isTurbo = isTurboSupplier.getAsBoolean();
-		boolean isSneak = isSneakSupplier.getAsBoolean();
+		forward = forwardSupplier.getAsDouble();
+		strafe = strafeSupplier.getAsDouble();
+		rotation = rotationSupplier.getAsDouble();
 
 		Translation2d translation = new Translation2d(forward, strafe);
 
@@ -67,7 +62,11 @@ public class TeleopDriveCommand extends Command {
 
 		SmartDashboard.putNumber("Curved Drive Translation Norm", translation.getNorm());
 
-		driveSubsystem.drive(translation, rotation, isTurbo, isSneak);
+		chassisSpeeds.vxMetersPerSecond = translation.getX();
+		chassisSpeeds.vyMetersPerSecond = translation.getY();
+		chassisSpeeds.omegaRadiansPerSecond = rotation;
+
+		driveSubsystem.fieldCentricDrive(chassisSpeeds);
 	}
 
 }

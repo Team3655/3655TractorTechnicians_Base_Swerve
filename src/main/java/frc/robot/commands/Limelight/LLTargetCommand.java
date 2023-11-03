@@ -5,6 +5,7 @@
 package frc.robot.commands.Limelight;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.LimelightHelpers;
 import frc.robot.Constants.LimelightConstants;
@@ -40,7 +41,7 @@ public class LLTargetCommand extends Command {
 	@Override
 	public void execute() {
 		double turnOutput = LLTargetpidController.calculate(LimelightHelpers.getTX(""), 0);
-		driveSubsystem.codeDrive(0, 0, turnOutput);
+		driveSubsystem.fieldCentricDrive(new ChassisSpeeds(0, 0, turnOutput));
 	}
 
 	// Called once the command ends or is interrupted.

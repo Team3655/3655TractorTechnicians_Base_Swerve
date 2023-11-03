@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -13,51 +12,24 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AutoConstants.PathPLannerConstants;
 import frc.robot.Constants.ModuleConstants.GenericModuleConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
-/** Add your docs here. */
+/**
+ * A class to encapsulate Pathplanner instantiations and simplify the creation
+ * of PP Commands.
+ */
 public class PPHandler {
 
-	private static PPHandler autoHandlerInstnace;
+	private static final DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
 
-	private static DriveSubsystem driveSubsystem;
+	private static final PathConstraints pathConstraints = new PathConstraints(
+			3.0, 4.0,
+			Units.degreesToRadians(540), Units.degreesToRadians(720));
 
-	private static SendableChooser<Command> autoChooser;
-
-	private static PathConstraints pathConstraints;
-
-	public static PPHandler getInstance() {
-		if (autoHandlerInstnace == null)
-			autoHandlerInstnace = new PPHandler();
-
-		return autoHandlerInstnace;
-	}
-
-	private PPHandler() {
-
-		driveSubsystem = DriveSubsystem.getInstance();
-
-		autoChooser = new SendableChooser<Command>();
-
-		pathConstraints = new PathConstraints(
-				3.0, 4.0,
-				Units.degreesToRadians(540), Units.degreesToRadians(720));
-
-		configAutoBuilder();
-
-		Shuffleboard.getTab("Driver").add(autoChooser);
-	}
-
-	public Command getAutonomousCommand() {
-		return autoChooser.getSelected();
-	}
-
-	public Command getPathfindingCommand(Pose2d targetPose, double endVelocity, double rotationDelay) {
+	public static Command getPathfindingCommand(Pose2d targetPose, double endVelocity, double rotationDelay) {
 		Command pathfindingCommand = AutoBuilder.pathfindToPose(
 				targetPose,
 				pathConstraints,
@@ -68,11 +40,11 @@ public class PPHandler {
 		return pathfindingCommand;
 	}
 
-	public void addAuto(String name) {
-		autoChooser.addOption(name, new PathPlannerAuto(name));
-	}
-
-	private void configAutoBuilder() {
+	/**
+	 * configures Pathplanners AutoBuilder (simply a wrapper to keep RobotContainer
+	 * clean)
+	 */
+	public static void configAutoBuilder() {
 		AutoBuilder.configureHolonomic(
 				// Robot pose supplier
 				driveSubsystem::getPoseEstimatorPose2d,

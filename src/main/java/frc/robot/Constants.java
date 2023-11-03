@@ -126,11 +126,9 @@ public final class Constants {
 
 	public static class DriveConstants {
 
-		public static final double kMaxSneakMetersPerSecond = 1.0;
 		public static final double kMaxSpeedMetersPerSecond = 5.5;
 
-		// this sets turning speed (keep this low) KsKs
-		public static final double kMaxRPM = 8;
+		public static final double kMaxRadiansPerSecond = Units.rotationsToRadians(2);
 
 		public static final int kPigeonID = 2;
 
