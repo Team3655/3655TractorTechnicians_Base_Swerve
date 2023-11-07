@@ -6,15 +6,15 @@ package frc.robot;
 
 import java.util.HashMap;
 
-import com.pathplanner.lib.util.PIDConstants;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SwerveModuleSteerFeedbackType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.TractorToolbox.TractorParts.PIDGains;
-import frc.lib.TractorToolbox.TractorParts.SwerveConstants;
-import frc.lib.TractorToolbox.TractorParts.SwerveModuleConstants;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -27,123 +27,139 @@ import frc.lib.TractorToolbox.TractorParts.SwerveModuleConstants;
  */
 public final class Constants {
 
-	public static class ModuleConstants {
+	/**
+	 * The constants pertaining to the drive station
+	 */
+	public static class DriverConstants {
+		public static final int kDriveJoystickPort = 0;
+		public static final int kTurnJoystickPort = 1;
+		public static final int kOperatorControllerPort = 2;
+		public static final int kProgrammerControllerPort = 3;
 
-		// gains set for R1 SDS mk4i using dual neo motors
-		public static final PIDGains kModuleDriveGains = new PIDGains(.075, 0, 0);
-		public static final PIDGains kModuleTurningGains = new PIDGains(1.5, 0.002, 0.0016);
-		public static final PIDConstants kTestPIDConstants = new PIDConstants(1.5, 0.002, 0.0016);
+		public static final double kDriveSpeedMetersPerSecond = 4.5;
 
-		public static final class GenericModuleConstants {
-			// Current limits for the wheels
-			public static final int kTurnMotorCurrentLimit = 25;
-			public static final int kDriveMotorCurrentLimit = 35;
+		// button bindings
 
-			// Constants set for the _SDS MK4i_
-			public static final double kTurnGearRatio = 1d / (150d / 7d);
-			public static final double kDriveGearRatio = 1d / (38250 / 6885);
-			public static final double kWheelCircumference = Units.inchesToMeters(4) * Math.PI;
-
-			// The max speeds the modules are capable of
-			public static final double kMaxModuleAccelMetersPerSecond = 5;
-			public static final double kMaxModuleSpeedMetersPerSecond = 5.35;
-
-			// Retune feedforward values for turning
-			// public static final double kvTurning = .43205;
-			// public static final double ksTurning = .17161; // Tuned February 2, 2023
-
-			public static final double kDriveFeedForward = .2;
-
-			public static final SwerveConstants kSwerveConstants = new SwerveConstants(
-					kTurnMotorCurrentLimit,
-					kDriveMotorCurrentLimit,
-					kTurnGearRatio,
-					kDriveGearRatio,
-					kWheelCircumference,
-					kMaxModuleAccelMetersPerSecond,
-					kMaxModuleSpeedMetersPerSecond,
-					kDriveFeedForward);
-		}
-
-		// module specific constants
-		public static final class FrontLeftModule {
-			public static final int kTurningMotorID = 10;
-			public static final int kLeaderDriveMotorID = 11;
-			public static final int kFollowerDriveMotorID = 12;
-			// public static final int kAbsoluteEncoderID = 9;
-			public static final double kAngleOffset = 26.3367;
-			public static final SwerveModuleConstants kModuleConstants = new SwerveModuleConstants(
-					// kAbsoluteEncoderID,
-					kTurningMotorID,
-					kLeaderDriveMotorID,
-					kFollowerDriveMotorID,
-					kAngleOffset);
-		}
-
-		public static final class FrontRightModule {
-			public static final int kTurningMotorID = 13;
-			public static final int kLeaderDriveMotorID = 14;
-			public static final int kFollowerDriveMotorID = 15;
-			// public static final int kAbsoluteEncoderID = 10;
-			public static final double kAngleOffset = 310.4834;
-			public static final SwerveModuleConstants kModuleConstants = new SwerveModuleConstants(
-					// kAbsoluteEncoderID,
-					kTurningMotorID,
-					kLeaderDriveMotorID,
-					kFollowerDriveMotorID,
-					kAngleOffset);
-		}
-
-		public static final class BackLeftModule {
-			public static final int kTurningMotorID = 16;
-			public static final int kLeaderDriveMotorID = 17;
-			public static final int kFollowerDriveMotorID = 18;
-			// public static final int kAbsoluteEncoderID = 11;
-			public static final double kAngleOffset = 31.5678;
-			public static final SwerveModuleConstants kModuleConstants = new SwerveModuleConstants(
-					// kAbsoluteEncoderID,
-					kTurningMotorID,
-					kLeaderDriveMotorID,
-					kFollowerDriveMotorID,
-					kAngleOffset);
-		}
-
-		public static final class BackRightModule {
-			public static final int kTurningMotorID = 19;
-			public static final int kLeaderDriveMotorID = 20;
-			public static final int kFollowerDriveMotorID = 21;
-			// public static final int kAbsoluteEncoderID = 12;
-			public static final double kAngleOffset = 43.5073;
-			public static final SwerveModuleConstants kModuleConstants = new SwerveModuleConstants(
-					// kAbsoluteEncoderID,
-					kTurningMotorID,
-					kLeaderDriveMotorID,
-					kFollowerDriveMotorID,
-					kAngleOffset);
-		}
+		public static final double KDeadBand = .1;
+		// this is the number that the joystick input will be raised to
+		public static final double kJoystickPow = 2.5;
 	}
 
-	public static class DriveConstants {
+	public class SwerveConstants {
 
-		public static final double kMaxSpeedMetersPerSecond = 5.5;
+		static class CustomSlotGains extends Slot0Configs {
+			public CustomSlotGains(double kP, double kI, double kD, double kV, double kS) {
+				this.kP = kP;
+				this.kI = kI;
+				this.kD = kD;
+				this.kV = kV;
+				this.kS = kS;
+			}
+		}
 
-		public static final double kMaxRadiansPerSecond = Units.rotationsToRadians(2);
+		private static final CustomSlotGains steerGains = new CustomSlotGains(100, 0, 0.05, 0, 0);
+		private static final CustomSlotGains driveGains = new CustomSlotGains(3, 0, 0, 0, 0);
 
-		public static final int kPigeonID = 2;
+		private static final double kCoupleRatio = 3.5;
 
-		public static final double kBumperToBumperWidth = Units.inchesToMeters(31);
+		private static final double kDriveGearRatio = 7.363636364;
+		private static final double kSteerGearRatio = 15.42857143;
+		private static final double kWheelRadiusInches = 2.167; // Estimated at first, then fudge-factored to make odom
+																// match record
+		private static final int kPigeonId = 1;
+		private static final boolean kSteerMotorReversed = true;
+		private static final String kCANbusName = "rio";
+		private static final boolean kInvertLeftSide = false;
+		private static final boolean kInvertRightSide = true;
 
-		public static final double kTrackWidth = Units.inchesToMeters(20); // in meters!
-		public static final double kWheelBase = Units.inchesToMeters(20); // in meters!
+		private static double kSteerInertia = 0.00001;
+		private static double kDriveInertia = 0.001;
 
-		public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
-				new Translation2d(kWheelBase / 2, kTrackWidth / 2), // FL
-				new Translation2d(kWheelBase / 2, -kTrackWidth / 2), // FR
-				new Translation2d(-kWheelBase / 2, kTrackWidth / 2), // RL
-				new Translation2d(-kWheelBase / 2, -kTrackWidth / 2)); // RR
+		public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
+				.withPigeon2Id(kPigeonId)
+				.withCANbusName(kCANbusName)
+				.withSupportsPro(true);
 
-		public static final boolean kGyroReversed = true;
-		public static final boolean kFeildCentric = true;
+		private static final SwerveModuleConstantsFactory ConstantCreator = new SwerveModuleConstantsFactory()
+				.withDriveMotorGearRatio(kDriveGearRatio)
+				.withSteerMotorGearRatio(kSteerGearRatio)
+				.withWheelRadius(kWheelRadiusInches)
+				.withSlipCurrent(30)
+				.withSteerMotorGains(steerGains)
+				.withDriveMotorGains(driveGains)
+				// Theoretical free speed is 10 meters per second at 12v applied output
+				.withSpeedAt12VoltsMps(6)
+				.withSteerInertia(kSteerInertia)
+				.withDriveInertia(kDriveInertia)
+				.withFeedbackSource(SwerveModuleSteerFeedbackType.FusedCANcoder)
+				.withCouplingGearRatio(kCoupleRatio) // Every 1 rotation of the azimuth results in couple ratio
+														// drive turns
+				.withSteerMotorInverted(kSteerMotorReversed);
+
+		private static final int kFrontLeftDriveMotorId = 5;
+		private static final int kFrontLeftSteerMotorId = 4;
+		private static final int kFrontLeftEncoderId = 2;
+		private static final double kFrontLeftEncoderOffset = -0.83544921875;
+
+		private static final double kFrontLeftXPosInches = 10.5;
+		private static final double kFrontLeftYPosInches = 10.5;
+		private static final int kFrontRightDriveMotorId = 7;
+		private static final int kFrontRightSteerMotorId = 6;
+		private static final int kFrontRightEncoderId = 3;
+		private static final double kFrontRightEncoderOffset = -0.15234375;
+
+		private static final double kFrontRightXPosInches = 10.5;
+		private static final double kFrontRightYPosInches = -10.5;
+		private static final int kBackLeftDriveMotorId = 1;
+		private static final int kBackLeftSteerMotorId = 0;
+		private static final int kBackLeftEncoderId = 0;
+		private static final double kBackLeftEncoderOffset = -0.4794921875;
+
+		private static final double kBackLeftXPosInches = -10.5;
+		private static final double kBackLeftYPosInches = 10.5;
+		private static final int kBackRightDriveMotorId = 3;
+		private static final int kBackRightSteerMotorId = 2;
+		private static final int kBackRightEncoderId = 1;
+		private static final double kBackRightEncoderOffset = -0.84130859375;
+
+		private static final double kBackRightXPosInches = -10.5;
+		private static final double kBackRightYPosInches = -10.5;
+
+		public static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
+				kFrontLeftSteerMotorId,
+				kFrontLeftDriveMotorId,
+				kFrontLeftEncoderId,
+				kFrontLeftEncoderOffset,
+				Units.inchesToMeters(kFrontLeftXPosInches),
+				Units.inchesToMeters(kFrontLeftYPosInches),
+				kInvertLeftSide);
+
+		public static final SwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
+				kFrontRightSteerMotorId,
+				kFrontRightDriveMotorId,
+				kFrontRightEncoderId,
+				kFrontRightEncoderOffset,
+				Units.inchesToMeters(kFrontRightXPosInches),
+				Units.inchesToMeters(kFrontRightYPosInches),
+				kInvertRightSide);
+
+		public static final SwerveModuleConstants BackLeft = ConstantCreator.createModuleConstants(
+				kBackLeftSteerMotorId,
+				kBackLeftDriveMotorId,
+				kBackLeftEncoderId,
+				kBackLeftEncoderOffset,
+				Units.inchesToMeters(kBackLeftXPosInches),
+				Units.inchesToMeters(kBackLeftYPosInches),
+				kInvertLeftSide);
+
+		public static final SwerveModuleConstants BackRight = ConstantCreator.createModuleConstants(
+				kBackRightSteerMotorId,
+				kBackRightDriveMotorId,
+				kBackRightEncoderId,
+				kBackRightEncoderOffset,
+				Units.inchesToMeters(kBackRightXPosInches),
+				Units.inchesToMeters(kBackRightYPosInches),
+				kInvertRightSide);
 
 	}
 
@@ -163,7 +179,8 @@ public final class Constants {
 			public static final double kPPMaxAcceleration = 2.50;
 
 			public static final HashMap<String, Command> kPPEventMap = new HashMap<>() {
-				{}
+				{
+				}
 			};
 		}
 
@@ -177,23 +194,6 @@ public final class Constants {
 		public static final PIDGains kBalanceCommandGains = new PIDGains(.006, 0, 0);
 		public static final double kMaxBalancingVelocity = 1000;
 		public static final double kMaxBalancingAcceleration = 5000;
-	}
-
-	/**
-	 * The constants pertaining to the drive station
-	 */
-	public static class OperatorConstants {
-		public static final int kDriveJoystickPort = 0;
-		public static final int kTurnJoystickPort = 1;
-		public static final int kOperatorControllerPort = 2;
-		public static final int kProgrammerControllerPort = 3;
-
-		// button bindings 
-		
-
-		public static final double KDeadBand = .1;
-		// this is the number that the joystick input will be raised to
-		public static final double kJoystickPow = 2.5;
 	}
 
 	public static class LimelightConstants {

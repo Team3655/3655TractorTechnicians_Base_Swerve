@@ -6,16 +6,14 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.DriverConstants;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -36,13 +34,13 @@ public class RobotContainer {
 	private final SendableChooser<Command> autoChooser;
 
 	private final CommandJoystick driveJoystick = new CommandJoystick(
-			OperatorConstants.kDriveJoystickPort);
+			DriverConstants.kDriveJoystickPort);
 	private final CommandJoystick turnJoystick = new CommandJoystick(
-			OperatorConstants.kTurnJoystickPort);
+			DriverConstants.kTurnJoystickPort);
 	private final CommandGenericHID operatorController = new CommandGenericHID(
-			OperatorConstants.kOperatorControllerPort);
+			DriverConstants.kOperatorControllerPort);
 	private final CommandXboxController programmerController = new CommandXboxController(
-			OperatorConstants.kProgrammerControllerPort);
+			DriverConstants.kProgrammerControllerPort);
 
 	/**
 	 * The container for the robot. Contains subsystems, OI devices, and commands.

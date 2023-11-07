@@ -6,9 +6,9 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -16,9 +16,11 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.AutoConstants.PathPLannerConstants;
-import frc.robot.Constants.ModuleConstants.GenericModuleConstants;
+import frc.robot.Constants.SwerveConstants;
 
 public class DriveSubsystem extends SwerveDrivetrain implements Subsystem {
 
@@ -40,8 +42,12 @@ public class DriveSubsystem extends SwerveDrivetrain implements Subsystem {
 	 * @param modules
 	 */
 	private DriveSubsystem() {
-		super();
-		//super(drivetrainConstants, OdometryUpdateFrequency, modules);
+		super(SwerveConstants.DrivetrainConstants,
+				250,
+				SwerveConstants.FrontLeft,
+				SwerveConstants.FrontRight,
+				SwerveConstants.BackLeft,
+				SwerveConstants.BackRight);
 		configAutoBuilder();
 	}
 
@@ -62,23 +68,39 @@ public class DriveSubsystem extends SwerveDrivetrain implements Subsystem {
 				// HolonomicPathFollowerConfig, this should likely live in your Constants class
 				new HolonomicPathFollowerConfig(
 						// Translation PID constants
-						// Rotation PID constants
 						new PIDConstants(
 								PathPLannerConstants.kPPDriveGains.kP,
 								PathPLannerConstants.kPPDriveGains.kI,
 								PathPLannerConstants.kPPDriveGains.kD),
+						// Rotation PID constants
 						new PIDConstants(
 								PathPLannerConstants.kPPTurnGains.kP,
 								PathPLannerConstants.kPPTurnGains.kI,
 								PathPLannerConstants.kPPTurnGains.kD),
 						// Max module speed, in m/s
-						GenericModuleConstants.kMaxModuleSpeedMetersPerSecond,
+						PathPLannerConstants.kPPMaxVelocity,
 						// Drive base radius in meters. Distance from robot center to furthest module.
 						0.4,
 						// Default path replanning config. See the API for the options here
-						new ReplanningConfig(true, true)),
+						new ReplanningConfig()),
 				// Reference to this subsystem to set requirements
 				this);
 	}
 
+	/**
+	 * applies a swerve request to the drivetrain
+	 * 
+	 * @param requestSupplier the swerve request to be sent. use Lambda () ->
+	 *                        SwerveRequest
+	 * 
+	 * @return A new RunCommand setting the control of the drivetrain to the
+	 *         SwerveRequest
+	 */
+	public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
+		return new RunCommand(() -> {
+			this.setControl(requestSupplier.get());
+		},
+				// Require the drive subsystem
+				this);
+	}
 }
