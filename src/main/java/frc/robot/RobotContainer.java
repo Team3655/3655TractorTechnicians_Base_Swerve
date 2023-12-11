@@ -1,26 +1,37 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright 2021-2023 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.TractorToolbox.TractorParts.PathBuilder;
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.TeleopDriveCommand;
-import frc.robot.commands.TurnCommand;
-import frc.robot.commands.Autonomous.BalanceCommand;
-import frc.robot.commands.Limelight.LLAlignCommand;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.commands.DriveCommands;
+import frc.robot.commands.FeedForwardCharacterization;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOSparkMax;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -29,101 +40,110 @@ import frc.robot.subsystems.DriveSubsystem;
  * the {@link Robot}
  * periodic methods (other than the scheduler calls). Instead, the structure of
  * the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
+ * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  // Subsystems
+  private final Drive drive;
 
-	// The robot's subsystems and commands are defined here...
-	private static final DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
+  // Controller
+  private final CommandXboxController controller = new CommandXboxController(0);
 
-	private static final PathBuilder autoBuilder = new PathBuilder();
+  // Dashboard inputs
+  private final LoggedDashboardChooser<Command> autoChooser;
 
-	private final CommandJoystick driveJoystick = new CommandJoystick(
-			OperatorConstants.kDriveJoystickPort);
-	private final CommandJoystick turnJoystick = new CommandJoystick(
-			OperatorConstants.kTurnJoystickPort);
-	private final CommandGenericHID operatorController = new CommandGenericHID(
-			OperatorConstants.kOperatorControllerPort);
-	private final CommandXboxController programmerController = new CommandXboxController(
-			OperatorConstants.kProgrammerControllerPort);
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
+  public RobotContainer() {
+    switch (Constants.currentMode) {
+      case REAL:
+        // Real robot, instantiate hardware IO implementations
+        drive = new Drive(
+            new GyroIOPigeon2(false),
+            new ModuleIOSparkMax(0),
+            new ModuleIOSparkMax(1),
+            new ModuleIOSparkMax(2),
+            new ModuleIOSparkMax(3));
+        // drive = new Drive(
+        // new GyroIOPigeon2(true),
+        // new ModuleIOTalonFX(0),
+        // new ModuleIOTalonFX(1),
+        // new ModuleIOTalonFX(2),
+        // new ModuleIOTalonFX(3));
+        // flywheel = new Flywheel(new FlywheelIOTalonFX());
+        break;
 
-	private SendableChooser<Command> autoChooser = new SendableChooser<>();
+      case SIM:
+        // Sim robot, instantiate physics sim IO implementations
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIOSim(),
+            new ModuleIOSim(),
+            new ModuleIOSim(),
+            new ModuleIOSim());
+        break;
 
-	/**
-	 * The container for the robot. Contains subsystems, OI devices, and commands.
-	 */
-	public RobotContainer() {
-		// Configure the trigger bindings
-		configureBindings();
+      default:
+        // Replayed robot, disable IO implementations
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            });
+        break;
+    }
 
-		// region Def Auto
-		Shuffleboard.getTab("Driver").add(autoChooser);
+    // Set up auto routines
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-		autoBuilder.populatePathMap();
+    // Set up FF characterization routines
+    autoChooser.addOption(
+        "Drive FF Characterization",
+        new FeedForwardCharacterization(
+            drive, drive::runCharacterizationVolts, drive::getCharacterizationVelocity));
 
-		autoChooser.addOption("Square", autoBuilder.getPathCommand("Square"));
-		// endregion
-	}
+    // Configure the button bindings
+    configureButtonBindings();
+  }
 
-	/**
-	 * Use this method to define your trigger->command mappings. Triggers can be
-	 * created via the {@link Trigger#Trigger(java.util.function.BooleanSupplier)}
-	 * constructor with an arbitrary predicate, or via the named factories in {@link
-	 * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-	 * {@link CommandXboxController
-	 * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-	 * PS4} controllers or
-	 * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-	 * joysticks}.
-	 */
-	private void configureBindings() {
+  /**
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   */
+  private void configureButtonBindings() {
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
+    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    controller.b().onTrue(
+        Commands.runOnce(
+            () -> drive.setPose(
+                new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+            drive)
+            .ignoringDisable(true));
+  }
 
-		// region Targeting Commmands
-		driveJoystick.button(3).whileTrue(new LLAlignCommand(false));
-		driveJoystick.button(4).whileTrue(new LLAlignCommand(true));
-		driveJoystick.button(5).whileTrue(new BalanceCommand());
-		programmerController.a().whileTrue(new LLAlignCommand(false));
-		programmerController.x().whileTrue(new TurnCommand(180));
-		// endregion
-
-		// test balance
-		operatorController.button(12).whileTrue(new BalanceCommand());
-
-		// region Drive Commands
-		driveJoystick.button(11).onTrue(new InstantCommand(() -> driveSubsystem.zeroHeading()));
-		driveJoystick.button(12).onTrue(driveSubsystem.toggleFieldCentric());
-
-		programmerController.button(8).onTrue(new InstantCommand(() -> driveSubsystem.zeroHeading()));
-		programmerController.button(6).onTrue(driveSubsystem.toggleFieldCentric());
-
-		driveJoystick.povUp().whileTrue(
-				new RunCommand(() -> driveSubsystem.robotCentricDrive(0.05, 0, 0), driveSubsystem));
-		driveJoystick.povDown().whileTrue(
-				new RunCommand(() -> driveSubsystem.robotCentricDrive(-0.05, 0, 0), driveSubsystem));
-
-		// Swerve Drive command is set as default for drive subsystem
-		driveSubsystem.setDefaultCommand(
-				new TeleopDriveCommand(
-						() -> -driveJoystick.getY() -programmerController.getLeftY(),
-						() -> -driveJoystick.getX() -programmerController.getLeftX(),
-						() -> -turnJoystick.getX() -programmerController.getRightX(),
-						() -> driveJoystick.getHID().getRawButton(1)
-								|| programmerController.rightBumper().getAsBoolean(),
-						() -> driveJoystick.getHID().getRawButton(2)
-								|| programmerController.rightBumper().getAsBoolean()));
-		// endregion
-	}
-
-	/**
-	 * Use this to pass the autonomous command to the main {@link Robot} class.
-	 *
-	 * @return the command to run in autonomous
-	 */
-	public Command getAutonomousCommand() {
-
-		driveSubsystem.setHeading(180);
-		Timer.delay(0.05);
-		// the command to be run in autonomous
-		return autoChooser.getSelected();
-	}
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+  public Command getAutonomousCommand() {
+    return autoChooser.get();
+  }
 }
