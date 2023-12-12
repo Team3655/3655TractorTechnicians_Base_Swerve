@@ -158,5 +158,18 @@ gradle-app.setting
 .settings/
 bin/
 
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# Fleet
+.fleet
+
 # Simulation GUI and other tools window save file
-*-window.json
+simgui*.json
+
+# Version file
+src/main/java/frc/robot/BuildConstants.java
