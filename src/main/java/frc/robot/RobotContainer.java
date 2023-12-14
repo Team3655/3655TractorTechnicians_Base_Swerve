@@ -139,7 +139,7 @@ public class RobotContainer {
             () -> -controller.getLeftY() * (1 - controller.getRightTriggerAxis()),
             () -> -controller.getLeftX() * (1 - controller.getRightTriggerAxis()),
             () -> -controller.getRightX()));
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    controller.x().whileTrue(Commands.run(drive::stopWithX, drive));
     controller
         .b()
         .onTrue(
