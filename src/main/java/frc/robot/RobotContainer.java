@@ -129,7 +129,7 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button -> command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
@@ -138,11 +138,20 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
+            // multiply by (1 - RightTrigger) to act as a variable "brake" or "damper" on
+            // the robots zoomieness
             () -> -controller.getLeftY() * (1 - controller.getRightTriggerAxis()),
             () -> -controller.getLeftX() * (1 - controller.getRightTriggerAxis()),
             () -> -controller.getRightX()));
 
-    controller.leftBumper().whileTrue(PathfindingCommands.pathfindToPath("single sub"));
+    // Pathfind to the intaking path at the 2023 single substation
+    controller.leftBumper().whileTrue(PathfindingCommands.pathfindToPath("single sub", 0.5));
+
+    controller
+        .rightBumper()
+        .whileTrue(
+            PathfindingCommands.pathfindToPose(
+                new Pose2d(1.629, 2.262, Rotation2d.fromDegrees(180)), 0, 0));
 
     controller.x().whileTrue(Commands.run(drive::stopWithX, drive));
 

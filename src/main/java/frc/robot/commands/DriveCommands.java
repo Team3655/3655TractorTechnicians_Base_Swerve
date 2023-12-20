@@ -39,9 +39,11 @@ public class DriveCommands {
       DoubleSupplier omegaSupplier) {
     return Commands.run(
         () -> {
-          // Apply deadband
+          // Apply deadband, and curve joystick inputs
           double linearMagnitude =
               JoystickUtils.curveInput(
+                  // uses the hypotenuse of the joystick to control the velocity (this is the
+                  // distance from )
                   Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), DEADBAND);
 
           Rotation2d linearDirection =
