@@ -147,11 +147,7 @@ public class RobotContainer {
     // Pathfind to the intaking path at the 2023 single substation
     controller.leftBumper().whileTrue(PathfindingCommands.pathfindToPath("single sub", 0.5));
 
-    controller
-        .rightBumper()
-        .whileTrue(
-            PathfindingCommands.pathfindToPose(
-                new Pose2d(1.629, 2.262, Rotation2d.fromDegrees(180)), 0, 0));
+    controller.rightBumper().whileTrue(PathfindingCommands.pathfindToPath("score", 0));
 
     controller.x().whileTrue(Commands.run(drive::stopWithX, drive));
 
