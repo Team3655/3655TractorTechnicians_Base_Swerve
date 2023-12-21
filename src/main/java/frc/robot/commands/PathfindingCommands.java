@@ -6,6 +6,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.ArrayList;
+import java.util.function.Supplier;
 
 public class PathfindingCommands {
 
@@ -74,5 +76,29 @@ public class PathfindingCommands {
         AutoBuilder.pathfindThenFollowPath(path, constraints, rotationDelay);
 
     return pathfindingCommand;
+  }
+
+  public static Command pathfindToNearestPath(
+      ArrayList<String> pathNames, Supplier<Pose2d> positionSupplier) {
+
+    ArrayList<PathPlannerPath> paths = new ArrayList<>();
+    // fill list with paths
+    pathNames.forEach((s) -> paths.add(PathPlannerPath.fromPathFile(s)));
+
+    PathPlannerPath closestPath = paths.get(0);
+
+    for (PathPlannerPath p : paths) {
+      if (getDistToPath(closestPath, positionSupplier.get()) > getDistToPath(p, positionSupplier.get())) {
+        closestPath = p;
+      }
+    }
+
+    Command pathfindingCommand = AutoBuilder.pathfindThenFollowPath(closestPath, constraints, 0);
+
+    return pathfindingCommand;
+  }
+
+  public static double getDistToPath(PathPlannerPath path, Pose2d pose) {
+    return path.getPoint(0).position.getDistance(pose.getTranslation());
   }
 }
