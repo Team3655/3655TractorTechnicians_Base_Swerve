@@ -35,6 +35,7 @@ import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.flywheel.FlywheelIOSparkMax;
+import java.util.ArrayList;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -56,6 +57,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final LoggedDashboardNumber flywheelSpeedInput =
       new LoggedDashboardNumber("Flywheel Speed", 1500.0);
+
+  private final ArrayList<String> pathsList = new ArrayList<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -124,6 +127,8 @@ public class RobotContainer {
         new FeedForwardCharacterization(
             flywheel, flywheel::runCharacterizationVolts, flywheel::getCharacterizationVelocity));
 
+    pathsList.add("test2");
+    pathsList.add("test1");
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -135,6 +140,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
@@ -147,7 +153,15 @@ public class RobotContainer {
     // Pathfind to the intaking path at the 2023 single substation
     controller.leftBumper().whileTrue(PathfindingCommands.pathfindToPath("single sub", 0.5));
 
-    controller.rightBumper().whileTrue(PathfindingCommands.pathfindToPath("score", 0));
+    controller
+        .y()
+        .whileTrue(PathfindingCommands.pathfindToNearestPath(pathsList, () -> drive.getPose()));
+
+    controller
+        .rightBumper()
+        .whileTrue(
+            PathfindingCommands.pathfindToPose(
+                new Pose2d(1.629, 2.262, Rotation2d.fromDegrees(180)), 0, 0));
 
     controller.x().whileTrue(Commands.run(drive::stopWithX, drive));
 
@@ -160,6 +174,7 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
     controller
         .a()
         .whileTrue(
