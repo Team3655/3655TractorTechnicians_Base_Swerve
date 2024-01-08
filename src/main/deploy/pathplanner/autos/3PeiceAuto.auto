@@ -1,0 +1,38 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.3862277051895042,
+      "y": 4.353135881156963
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "pickup1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Run Flywheel"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
