@@ -1,16 +1,3 @@
-// Copyright 2021-2023 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.MathUtil;
@@ -28,8 +15,8 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ModuleIOSim implements ModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private DCMotorSim driveSim = new DCMotorSim(DCMotor.getNEO(1), Drive.DRIVE_GEAR_RATIO, 0.075);
-  private DCMotorSim turnSim = new DCMotorSim(DCMotor.getNEO(1), Drive.TURN_GEAR_RATIO, 0.004);
+  private DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), Drive.DRIVE_GEAR_RATIO, 0.075);
+  private DCMotorSim turnSim = new DCMotorSim(DCMotor.getKrakenX60(1), Drive.TURN_GEAR_RATIO, 0.004);
 
   private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
